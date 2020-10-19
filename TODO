@@ -1,0 +1,9 @@
+1. added prop path to error::error
+2. test File::size
+3. test File::metadata
+4. test File::set_permissions
+5. remove static names from tests as much as possible
+6. rename path_stuff::ParsedPathDir.directory to parent
+7. test Dir::size
+8. fix doc test
+9. add Dir::rename

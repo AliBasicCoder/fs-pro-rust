@@ -1,8 +1,16 @@
 [package]
-name = "fs-pro"
+name = "fs_pro"
 version = "1.0.0"
 authors = ["alianmad <aliahmedreda34@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "a lib to work with files and folders easliy"
+homepage = "https://github.com/AliBasicCoder/fs-pro-rust"
+repository = "https://github.com/AliBasicCoder/fs-pro-rust.git"
+readme = "README.md"
+categories = ["filesystem"]
+keywords = ["fs", "filesystem", "files", "folders", "fspro"]
 
 [dependencies]
 fs_extra = "1.1.0"
+rand = "0.7.3"

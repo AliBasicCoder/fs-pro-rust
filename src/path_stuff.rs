@@ -1,11 +1,30 @@
+use crate::error;
+use rand::{self, Rng};
 use std::path::Path;
+
+pub fn get_rand_chars(len: usize) -> String {
+  let mut rng = rand::thread_rng();
+  let chars: String = std::iter::repeat(())
+    .map(|()| rng.sample(rand::distributions::Alphanumeric))
+    .take(len)
+    .collect();
+  chars
+}
+
 #[derive(Debug, Copy, Clone)]
-pub struct PathProp<'a> {
-  path: &'a str,
-  directory: &'a str,
-  name: &'a str,
-  name_without_extension: &'a str,
-  extension: &'a str,
+pub struct ParsedPathFile<'a> {
+  pub path: &'a str,
+  pub directory: &'a str,
+  pub name: &'a str,
+  pub name_without_extension: &'a str,
+  pub extension: &'a str,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct ParsedPathDir<'a> {
+  pub path: &'a str,
+  pub directory: &'a str,
+  pub name: &'a str,
 }
 
 #[macro_export]
@@ -21,7 +40,7 @@ macro_rules! join {
 }
 
 #[allow(dead_code)]
-pub fn join(paths: &[&str]) -> std::path::PathBuf {
+pub fn join<P: AsRef<Path>>(paths: &[P]) -> std::path::PathBuf {
   let mut path = std::path::PathBuf::new();
   for p in paths {
     path.push(p);
@@ -29,61 +48,74 @@ pub fn join(paths: &[&str]) -> std::path::PathBuf {
   path
 }
 
-pub fn directory(path_inst: &Path) -> Result<&str, &str> {
-  if let Some(parent) = path_inst.parent() {
-    if let Some(parent_to_str) = parent.to_str() {
-      Ok(parent_to_str)
-    } else {
-      Err("failed to convert parent to &str")
-    }
+pub fn directory(path_inst: &Path) -> error::Result<&str> {
+  let parent = error::result_from_option2(path_inst.parent(), error::ErrorKind::PathNoParentFound)?;
+  let parent_to_str =
+    error::result_from_option2(parent.to_str(), error::ErrorKind::PathToStrConversionFail)?;
+  Ok(parent_to_str)
+}
+
+pub fn name(path_inst: &Path) -> error::Result<&str> {
+  let name =
+    error::result_from_option2(path_inst.file_name(), error::ErrorKind::PathNoFilenameFound)?;
+  let name_to_str =
+    error::result_from_option2(name.to_str(), error::ErrorKind::PathToStrConversionFail)?;
+  Ok(name_to_str)
+}
+
+pub fn extension(path_inst: &Path) -> error::Result<&str> {
+  let extension = error::result_from_option2(
+    path_inst.extension(),
+    error::ErrorKind::PathNoExtensionFound,
+  )?;
+  let extension_to_str = error::result_from_option2(
+    extension.to_str(),
+    error::ErrorKind::PathToStrConversionFail,
+  )?;
+  Ok(extension_to_str)
+}
+
+pub fn name_without_extension(path_inst: &Path) -> error::Result<&str> {
+  let name = name(path_inst)?;
+  if let Some(last_dot_index) = name.rfind(".") {
+    Ok(&name[..last_dot_index])
   } else {
-    Err("no parent found")
+    Ok(name)
   }
 }
-pub fn name(path_inst: &Path) -> Result<&str, &str> {
-  if let Some(name) = path_inst.file_name() {
-    if let Some(name_to_str) = name.to_str() {
-      Ok(name_to_str)
-    } else {
-      Err("failed to convert name to &str")
-    }
-  } else {
-    Err("file name not found")
-  }
+
+pub fn path_to_str(path_inst: &Path) -> error::Result<&str> {
+  Ok(error::result_from_option2(
+    path_inst.to_str(),
+    error::ErrorKind::PathToStrConversionFail,
+  )?)
 }
-pub fn extension(path_inst: &Path) -> Result<&str, &str> {
-  if let Some(extension) = path_inst.extension() {
-    if let Some(extension_to_str) = extension.to_str() {
-      Ok(extension_to_str)
-    } else {
-      Err("failed to convert extension to &str")
-    }
-  } else {
-    Err("extension not found")
-  }
-}
-pub fn name_without_extension(path_inst: &Path) -> Result<&str, &str> {
-  match name(path_inst) {
-    Ok(name) => {
-      if let Some(last_dot_index) = name.rfind(".") {
-        Ok(&name[..last_dot_index])
-      } else {
-        Ok(name)
-      }
-    }
-    Err(e) => Err(e),
-  }
-}
-pub fn path_as_path_prop<'a>(path_inst: &'a Path, path: &'a str) -> Result<PathProp<'a>, &'a str> {
+
+pub fn parse_path_file<'a>(path_inst: &'a Path) -> error::Result<ParsedPathFile<'a>> {
+  let path = path_to_str(path_inst)?;
   let directory = directory(path_inst)?;
   let name = name(path_inst)?;
-  let extension = extension(path_inst)?;
   let name_without_extension = name_without_extension(path_inst)?;
-  Ok(PathProp {
+  let extension = match extension(path_inst) {
+    Ok(val) => val,
+    Err(_) => "",
+  };
+  Ok(ParsedPathFile {
     directory: directory,
     name: name,
     name_without_extension: name_without_extension,
     extension: extension,
+    path: path,
+  })
+}
+
+pub fn parse_path_dir<'a>(path_inst: &'a Path) -> error::Result<ParsedPathDir<'a>> {
+  let path = path_to_str(path_inst)?;
+  let directory = directory(path_inst)?;
+  let name = name(path_inst)?;
+  Ok(ParsedPathDir {
+    directory: directory,
+    name: name,
     path: path,
   })
 }
