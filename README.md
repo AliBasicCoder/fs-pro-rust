@@ -5,9 +5,9 @@
 ![crates.io](https://img.shields.io/crates/v/fs_pro.svg)
 ![Crates.io](https://img.shields.io/crates/d/fs_pro)
 
-the is a beta rust version of [https://github.com/AliBasicCoder/fs-pro](fs-pro)
+the is a beta rust version of [fs-pro](https://github.com/AliBasicCoder/fs-pro)
 
-see the full docs [https://docs.rs/fs_pro](here)
+see the full docs [here](https://docs.rs/fs_pro)
 
 ## Features
 
