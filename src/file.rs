@@ -140,11 +140,18 @@ impl File {
   /// create the file if it doesn't exists
   pub fn create(&self) -> error::Result<()> {
     if !self.exists() {
-      error::result_from_io(std::fs::File::create(self.path.as_path()))?;
+      error::result_from_io(fs::File::create(self.path.as_path()))?;
       Ok(())
     } else {
       Ok(())
     }
+  }
+  /// creates the directory and it's parent if doesn't exists
+  pub fn create_all(&self) -> error::Result<()> {
+    let parent = error::result_from_option2(self.path.parent(), error::ErrorKind::PathNoParentFound)?;
+    error::result_from_io(fs::create_dir_all(parent))?;
+    self.create()?;
+    Ok(())
   }
   /// writes to file
   /// ```
