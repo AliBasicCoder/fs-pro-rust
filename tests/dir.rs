@@ -1,6 +1,6 @@
 use fs_pro::{error, Dir, File, ParsedPathDir};
 
-fn okay_to_err<T>(result: error::Result<T>) {
+fn okay_to_err<T, E>(result: Result<T, E>) {
   match result {
     Ok(_) => {}
     Err(_) => {}
@@ -109,6 +109,15 @@ fn create() -> error::Result<()> {
   dir.create()?;
   assert_eq!(dir.path.exists(), true);
   okay_to_err(dir.delete());
+  Ok(())
+}
+
+#[test]
+fn create_all() -> error::Result<()> {
+  let dir = Dir::temp_dir_no_create("foo/bar").unwrap();
+  dir.create_all()?;
+  assert_eq!(dir.path.exists(), true);
+  okay_to_err(fs_extra::dir::remove(dir.path.parent().unwrap().parent().unwrap()));
   Ok(())
 }
 

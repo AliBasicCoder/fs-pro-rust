@@ -4,7 +4,7 @@ use std::{
   path::{Path, PathBuf},
 };
 
-fn okay_to_err<T>(result: error::Result<T>) {
+fn okay_to_err<T, E>(result: Result<T, E>) {
   match result {
     Ok(_) => {}
     Err(_) => {}
@@ -47,6 +47,23 @@ fn temp_file_rand() {
   let file = File::temp_file_rand().unwrap();
   assert!(file.path.starts_with(std::env::temp_dir()));
   okay_to_err(file.delete());
+}
+
+#[test]
+fn create() -> error::Result<()> {
+  let file = File::temp_file_rand_no_create().unwrap();
+  file.create()?;
+  assert_eq!(file.path.exists(), true);
+  okay_to_err(file.delete());
+  Ok(())
+}
+#[test]
+fn create_all() -> error::Result<()> {
+  let file = File::temp_file("foo/bar.txt").unwrap();
+  file.create_all()?;
+  assert_eq!(file.path.exists(), true);
+  okay_to_err(fs_extra::dir::remove(file.path.parent().unwrap()));
+  Ok(())
 }
 
 #[test]
