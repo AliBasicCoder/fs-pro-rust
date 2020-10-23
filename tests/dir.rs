@@ -94,10 +94,10 @@ fn parse_path() -> error::Result<()> {
   }
   let expected = ParsedPathDir {
     path: dir.path.to_str().unwrap(),
-    directory: temp_dir_str.as_str(),
+    parent: temp_dir_str.as_str(),
     name: "hello there4"
   };
-  assert_eq!(parsed.directory, expected.directory);
+  assert_eq!(parsed.parent, expected.parent);
   assert_eq!(parsed.name, expected.name);
   assert_eq!(parsed.path, expected.path);
   Ok(())

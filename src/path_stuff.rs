@@ -11,19 +11,29 @@ pub fn get_rand_chars(len: usize) -> String {
   chars
 }
 
+/// the result of fs_pro::File::parse_path
 #[derive(Debug, Copy, Clone)]
 pub struct ParsedPathFile<'a> {
+  /// the path of file
   pub path: &'a str,
-  pub directory: &'a str,
+  // the parent of file
+  pub parent: &'a str,
+  /// the file name of file (including extension)
   pub name: &'a str,
+  /// the file name of file (excluding extension)
   pub name_without_extension: &'a str,
+  /// the extension of file
   pub extension: &'a str,
 }
 
+/// the result of fs_pro::Dir::parse_path
 #[derive(Debug, Copy, Clone)]
 pub struct ParsedPathDir<'a> {
+  /// the path of directory
   pub path: &'a str,
-  pub directory: &'a str,
+  /// the parent of directory
+  pub parent: &'a str,
+  /// the name of directory
   pub name: &'a str,
 }
 
@@ -48,7 +58,7 @@ pub fn join<P: AsRef<Path>>(paths: &[P]) -> std::path::PathBuf {
   path
 }
 
-pub fn directory(path_inst: &Path) -> error::Result<&str> {
+pub fn parent(path_inst: &Path) -> error::Result<&str> {
   let parent = error::result_from_option2(path_inst.parent(), error::ErrorKind::PathNoParentFound)?;
   let parent_to_str =
     error::result_from_option2(parent.to_str(), error::ErrorKind::PathToStrConversionFail)?;
@@ -93,7 +103,7 @@ pub fn path_to_str(path_inst: &Path) -> error::Result<&str> {
 
 pub fn parse_path_file<'a>(path_inst: &'a Path) -> error::Result<ParsedPathFile<'a>> {
   let path = path_to_str(path_inst)?;
-  let directory = directory(path_inst)?;
+  let directory = parent(path_inst)?;
   let name = name(path_inst)?;
   let name_without_extension = name_without_extension(path_inst)?;
   let extension = match extension(path_inst) {
@@ -101,7 +111,7 @@ pub fn parse_path_file<'a>(path_inst: &'a Path) -> error::Result<ParsedPathFile<
     Err(_) => "",
   };
   Ok(ParsedPathFile {
-    directory: directory,
+    parent: directory,
     name: name,
     name_without_extension: name_without_extension,
     extension: extension,
@@ -111,10 +121,10 @@ pub fn parse_path_file<'a>(path_inst: &'a Path) -> error::Result<ParsedPathFile<
 
 pub fn parse_path_dir<'a>(path_inst: &'a Path) -> error::Result<ParsedPathDir<'a>> {
   let path = path_to_str(path_inst)?;
-  let directory = directory(path_inst)?;
+  let directory = parent(path_inst)?;
   let name = name(path_inst)?;
   Ok(ParsedPathDir {
-    directory: directory,
+    parent: directory,
     name: name,
     path: path,
   })

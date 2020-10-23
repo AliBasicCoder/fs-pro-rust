@@ -10,6 +10,7 @@ repository = "https://github.com/AliBasicCoder/fs-pro-rust.git"
 readme = "README.md"
 categories = ["filesystem"]
 keywords = ["fs", "filesystem", "files", "folders", "fspro"]
+documentation = "https://docs.rs/fs_pro"
 
 [dependencies]
 fs_extra = "1.1.0"

@@ -7,6 +7,7 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+/// the File struct is a struct to help you work with files
 #[derive(Debug, Clone)]
 pub struct File {
   pub path: PathBuf,
@@ -15,6 +16,17 @@ pub struct File {
 // new and static methods and prop-like methods
 #[allow(dead_code)]
 impl File {
+  /// creates a new File
+  /// ```
+  /// use fs_pro::File;
+  ///
+  /// let path = File::new("/path/to/path").unwrap();
+  /// let path = File::new(Path::new("/path/to/path")).unwrap();
+  /// let path = File::new(PathBuf::from("/path/to/path"));
+  /// ```
+  /// # Errors
+  /// - given path is directory
+  /// - invalid path
   pub fn new<P: AsRef<Path>>(path: P) -> error::Result<File> {
     let mut path_buf = PathBuf::new();
     path_buf.push(path);
@@ -28,38 +40,92 @@ impl File {
       Ok(File { path: path_buf })
     }
   }
+  /// creates a file in the temp directory
+  /// ```
+  /// use fs_pro::File;
+  /// 
+  /// let temp_file = Fir::temp_file("name").unwrap();
+  /// ```
   pub fn temp_file<P: AsRef<Path>>(name: P) -> error::Result<File> {
     let file = File::temp_file_no_create(name)?;
     file.create()?;
     Ok(file)
   }
+  /// like `temp_file` but doesn't create file
+  /// ```
+  /// use fs_pro::File;
+  /// 
+  /// let temp_file = Fir::temp_file_no_create("name").unwrap();
+  /// ```
   pub fn temp_file_no_create<P: AsRef<Path>>(name: P) -> error::Result<File> {
     let mut tmp_dir = std::env::temp_dir();
     tmp_dir.push(name);
     let file = File::new(tmp_dir)?;
     Ok(file)
   }
+  /// create a file in the temp directory with random name
+  /// ```
+  /// use fs_pro::File;
+  /// 
+  /// let temp_file = File::temp_file_rand();
+  /// ```
   pub fn temp_file_rand() -> error::Result<File> {
     Ok(File::temp_file(path_stuff::get_rand_chars(10))?)
   }
+  /// like `temp_file_rand` but doesn't create file
+  /// ```
+  /// use fs_pro::File;
+  /// 
+  /// let temp_file = File::temp_file_rand_no_create();
+  /// ```
   pub fn temp_file_rand_no_create() -> error::Result<File> {
     Ok(File::temp_file_no_create(path_stuff::get_rand_chars(10))?)
   }
-  pub fn directory(&self) -> error::Result<&str> {
-    path_stuff::directory(self.path.as_path())
+  /// gets the parent of the file in &str
+  /// ```
+  /// use fs_pro::File;
+  /// 
+  /// let file = File::temp_file_rand().unwrap();
+  /// assert_eq!(file.parent().unwrap(), "/tmp");
+  /// ```
+  pub fn parent(&self) -> error::Result<&str> {
+    path_stuff::parent(self.path.as_path())
   }
+  /// gets the file name (including extension) in &str
+  /// ```
+  /// use fs_pro::File
+  /// 
+  /// let file = File::new("my_file.txt").unwrap();
+  /// assert_eq!(file.name().unwrap(), "my_file.txt");
+  /// ```
   pub fn name(&self) -> error::Result<&str> {
     path_stuff::name(self.path.as_path())
   }
+  /// gets the file name (excluding extension) in &str
+  /// ```
+  /// use fs_pro::File
+  /// 
+  /// let file = File::new("my_file.txt").unwrap();
+  /// assert_eq!(file.name_without_extension().unwrap(), "my_file");
+  /// ```
   pub fn name_without_extension(&self) -> error::Result<&str> {
     path_stuff::name_without_extension(self.path.as_path())
   }
+  /// gets the extension of file in &str
+  /// ```
+  /// use fs_pro::File
+  /// 
+  /// let file = File::new("my_file.txt").unwrap();
+  /// assert_eq!(file.extension().unwrap(), "txt");
+  /// ```
   pub fn extension(&self) -> error::Result<&str> {
     path_stuff::extension(self.path.as_path())
   }
+  /// parses the file path and returns fs_pro::ParsedPathFile
   pub fn parse_path(&self) -> error::Result<path_stuff::ParsedPathFile> {
     path_stuff::parse_path_file(self.path.as_path())
   }
+  /// returns the size of file in bytes
   pub fn size(&self) -> error::Result<u64> {
     Ok(self.metadata()?.len())
   }

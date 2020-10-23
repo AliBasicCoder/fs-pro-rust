@@ -54,7 +54,7 @@ fn directory() {
   let file = File::temp_file_rand_no_create().unwrap();
   let temp_dir = std::env::temp_dir();
   let mut expected = String::from(temp_dir.to_str().unwrap());
-  let dir = file.directory().unwrap();
+  let dir = file.parent().unwrap();
   if expected.ends_with("/") || expected.ends_with("\\") {
     expected.pop();
   }
@@ -94,14 +94,14 @@ fn parse_path() {
   }
   let parsed = file.parse_path().unwrap();
   let expected = ParsedPathFile {
-    directory: temp_dir_str.as_str(),
+    parent: temp_dir_str.as_str(),
     name: "hello_world.txt",
     extension: "txt",
     name_without_extension: "hello_world",
     path: file.path.to_str().unwrap(),
   };
 
-  assert_eq!(parsed.directory, expected.directory);
+  assert_eq!(parsed.parent, expected.parent);
   assert_eq!(parsed.name, expected.name);
   assert_eq!(
     parsed.name_without_extension,

@@ -6,6 +6,8 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+/// the Dir struct is a struct for helping you
+/// working with directories 
 #[derive(Debug, Clone)]
 pub struct Dir {
   pub path: PathBuf,
@@ -14,6 +16,17 @@ pub struct Dir {
 // new and prop-like methods
 #[allow(dead_code)]
 impl Dir {
+  /// creates a new Dir
+  /// ```
+  /// use fs_pro::Dir;
+  ///
+  /// let dir = Dir::new("/path/to/dir").unwrap();
+  /// let dir = Dir::new(Path::new("/path/to/dir")).unwrap();
+  /// let dir = Dir::new(PathBuf::from("/path/to/dir"));
+  /// ```
+  /// # Errors
+  /// - given path is file
+  /// - invalid path
   pub fn new<'a, P: 'a + AsRef<Path>>(path: P) -> error::Result<Dir> {
     let mut path_buf = PathBuf::new();
     path_buf.push(path);
@@ -24,32 +37,72 @@ impl Dir {
       Ok(Dir { path: path_buf })
     }
   }
+  /// creates a directory in the temp directory
+  /// ```
+  /// use fs_pro::Dir;
+  /// 
+  /// let temp_dir = Dir::temp_dir("name").unwrap();
+  /// ```
   pub fn temp_dir<'a, P: 'a + AsRef<Path>>(name: P) -> error::Result<Dir> {
     let dir = Dir::temp_dir_no_create(name)?;
     dir.create()?;
     Ok(dir)
   }
+  /// like `temp_dir` but doesn't create the directory
+  /// ```
+  /// use fs_pro::Dir;
+  /// 
+  /// let temp_dir = Dir::temp_dir_no_create("name").unwrap();
+  /// ```
   pub fn temp_dir_no_create<'a, P: 'a + AsRef<Path>>(name: P) -> error::Result<Dir> {
     let mut tmp_dir = std::env::temp_dir();
     tmp_dir.push(name);
     let dir = Dir::new(tmp_dir)?;
     Ok(dir)
   }
+  /// create a directory in the temp directory with random name
+  /// ```
+  /// use fs_pro::Dir;
+  /// 
+  /// let temp_dir = Dir::temp_dir_rand();
+  /// ```
   pub fn temp_dir_rand() -> error::Result<Dir> {
     Ok(Dir::temp_dir(path_stuff::get_rand_chars(10))?)
   }
+  /// like `temp_dir_rand` but doesn't create the directory
+  /// ```
+  /// use fs_pro::Dir;
+  /// 
+  /// let temp_dir = Dir::temp_dir_rand_no_create();
+  /// ```
   pub fn temp_dir_rand_no_create() -> error::Result<Dir> {
     Ok(Dir::temp_dir_no_create(path_stuff::get_rand_chars(10))?)
   }
+  /// gets the parent of the directory in &str
+  /// ```
+  /// use fs_pro::Dir;
+  /// 
+  /// let dir = Dir::temp_dir_rand().unwrap();
+  /// assert_eq!(dir.parent().unwrap(), "/tmp");
+  /// ```
   pub fn parent(&self) -> error::Result<&str> {
-    path_stuff::directory(self.path.as_path())
+    path_stuff::parent(self.path.as_path())
   }
+  /// gets the name of the directory in &str
+  /// ```
+  /// use fs_pro::Dir;
+  /// 
+  /// let dir = Dir::temp_dir("my_dir").unwrap();
+  /// assert_eq!(dir.name().unwrap(), "my_dir");
+  /// ```
   pub fn name(&self) -> error::Result<&str> {
     path_stuff::name(self.path.as_path())
   }
+  /// parses the path and returns fs_pro::ParedPathDir
   pub fn parse_path(&self) -> error::Result<path_stuff::ParsedPathDir> {
     path_stuff::parse_path_dir(self.path.as_path())
   }
+  /// get the size of directory in bytes
   pub fn size(&self) -> error::Result<u64> {
     Ok(error::result_from_fse(fs_extra::dir::get_size(&self.path))?)
   }
@@ -68,6 +121,11 @@ impl Dir {
     } else {
       error::result_from_io(fs::create_dir(&self.path))
     }
+  }
+  /// creates the directory and it's parent if doesn't exists
+  pub fn create_all(&self) -> error::Result<()> {
+    error::result_from_io(fs::create_dir_all(&self.path))?;
+    Ok(())
   }
   /// delete the directory even if empty
   pub fn delete(&self) -> error::Result<()> {
