@@ -44,7 +44,7 @@ impl File {
   /// creates a file in the temp directory
   /// ```
   /// use fs_pro::File;
-  /// 
+  ///
   /// let temp_file = Fir::temp_file("name").unwrap();
   /// ```
   pub fn temp_file<P: AsRef<Path>>(name: P) -> error::Result<File> {
@@ -55,7 +55,7 @@ impl File {
   /// like `temp_file` but doesn't create file
   /// ```
   /// use fs_pro::File;
-  /// 
+  ///
   /// let temp_file = Fir::temp_file_no_create("name").unwrap();
   /// ```
   pub fn temp_file_no_create<P: AsRef<Path>>(name: P) -> error::Result<File> {
@@ -67,7 +67,7 @@ impl File {
   /// create a file in the temp directory with random name
   /// ```
   /// use fs_pro::File;
-  /// 
+  ///
   /// let temp_file = File::temp_file_rand();
   /// ```
   pub fn temp_file_rand() -> error::Result<File> {
@@ -76,7 +76,7 @@ impl File {
   /// like `temp_file_rand` but doesn't create file
   /// ```
   /// use fs_pro::File;
-  /// 
+  ///
   /// let temp_file = File::temp_file_rand_no_create();
   /// ```
   pub fn temp_file_rand_no_create() -> error::Result<File> {
@@ -85,7 +85,7 @@ impl File {
   /// gets the parent of the file in &str
   /// ```
   /// use fs_pro::File;
-  /// 
+  ///
   /// let file = File::temp_file_rand().unwrap();
   /// assert_eq!(file.parent().unwrap(), "/tmp");
   /// ```
@@ -95,7 +95,7 @@ impl File {
   /// gets the file name (including extension) in &str
   /// ```
   /// use fs_pro::File
-  /// 
+  ///
   /// let file = File::new("my_file.txt").unwrap();
   /// assert_eq!(file.name().unwrap(), "my_file.txt");
   /// ```
@@ -105,7 +105,7 @@ impl File {
   /// gets the file name (excluding extension) in &str
   /// ```
   /// use fs_pro::File
-  /// 
+  ///
   /// let file = File::new("my_file.txt").unwrap();
   /// assert_eq!(file.name_without_extension().unwrap(), "my_file");
   /// ```
@@ -115,7 +115,7 @@ impl File {
   /// gets the extension of file in &str
   /// ```
   /// use fs_pro::File
-  /// 
+  ///
   /// let file = File::new("my_file.txt").unwrap();
   /// assert_eq!(file.extension().unwrap(), "txt");
   /// ```
@@ -149,7 +149,8 @@ impl File {
   }
   /// creates the directory and it's parent if doesn't exists
   pub fn create_all(&self) -> error::Result<()> {
-    let parent = error::result_from_option2(self.path.parent(), error::ErrorKind::PathNoParentFound)?;
+    let parent =
+      error::result_from_option2(self.path.parent(), error::ErrorKind::PathNoParentFound)?;
     error::result_from_io(fs::create_dir_all(parent))?;
     self.create()?;
     Ok(())
@@ -302,7 +303,7 @@ impl File {
   /// parses file as json
   /// ```
   /// use serde_json::Value;
-  /// 
+  ///
   /// let json: Value = file.json();
   /// ```
   #[cfg(feature = "json")]
@@ -312,7 +313,7 @@ impl File {
     let maybe_res: serde_json::error::Result<T> = serde_json::from_reader(reader);
     match maybe_res {
       Ok(res) => Ok(res),
-      Err(e) => Err(error::Error::new_from_kind(error::ErrorKind::JsonError(e)))
+      Err(e) => Err(error::Error::new_from_kind(error::ErrorKind::JsonError(e))),
     }
   }
 }

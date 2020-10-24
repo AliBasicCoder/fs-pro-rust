@@ -7,7 +7,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 /// the Dir struct is a struct for helping you
-/// working with directories 
+/// working with directories
 #[derive(Debug, Clone)]
 pub struct Dir {
   /// the path of directory
@@ -41,7 +41,7 @@ impl Dir {
   /// creates a directory in the temp directory
   /// ```
   /// use fs_pro::Dir;
-  /// 
+  ///
   /// let temp_dir = Dir::temp_dir("name").unwrap();
   /// ```
   pub fn temp_dir<'a, P: 'a + AsRef<Path>>(name: P) -> error::Result<Dir> {
@@ -52,7 +52,7 @@ impl Dir {
   /// like `temp_dir` but doesn't create the directory
   /// ```
   /// use fs_pro::Dir;
-  /// 
+  ///
   /// let temp_dir = Dir::temp_dir_no_create("name").unwrap();
   /// ```
   pub fn temp_dir_no_create<'a, P: 'a + AsRef<Path>>(name: P) -> error::Result<Dir> {
@@ -64,7 +64,7 @@ impl Dir {
   /// create a directory in the temp directory with random name
   /// ```
   /// use fs_pro::Dir;
-  /// 
+  ///
   /// let temp_dir = Dir::temp_dir_rand();
   /// ```
   pub fn temp_dir_rand() -> error::Result<Dir> {
@@ -73,7 +73,7 @@ impl Dir {
   /// like `temp_dir_rand` but doesn't create the directory
   /// ```
   /// use fs_pro::Dir;
-  /// 
+  ///
   /// let temp_dir = Dir::temp_dir_rand_no_create();
   /// ```
   pub fn temp_dir_rand_no_create() -> error::Result<Dir> {
@@ -82,7 +82,7 @@ impl Dir {
   /// gets the parent of the directory in &str
   /// ```
   /// use fs_pro::Dir;
-  /// 
+  ///
   /// let dir = Dir::temp_dir_rand().unwrap();
   /// assert_eq!(dir.parent().unwrap(), "/tmp");
   /// ```
@@ -92,7 +92,7 @@ impl Dir {
   /// gets the name of the directory in &str
   /// ```
   /// use fs_pro::Dir;
-  /// 
+  ///
   /// let dir = Dir::temp_dir("my_dir").unwrap();
   /// assert_eq!(dir.name().unwrap(), "my_dir");
   /// ```

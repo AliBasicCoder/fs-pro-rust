@@ -95,7 +95,7 @@ fn parse_path() -> error::Result<()> {
   let expected = ParsedPathDir {
     path: dir.path.to_str().unwrap(),
     parent: temp_dir_str.as_str(),
-    name: "hello there4"
+    name: "hello there4",
   };
   assert_eq!(parsed.parent, expected.parent);
   assert_eq!(parsed.name, expected.name);
@@ -117,7 +117,9 @@ fn create_all() -> error::Result<()> {
   let dir = Dir::temp_dir_no_create("foo/bar").unwrap();
   dir.create_all()?;
   assert_eq!(dir.path.exists(), true);
-  okay_to_err(fs_extra::dir::remove(dir.path.parent().unwrap().parent().unwrap()));
+  okay_to_err(fs_extra::dir::remove(
+    dir.path.parent().unwrap().parent().unwrap(),
+  ));
   Ok(())
 }
 
@@ -203,7 +205,7 @@ fn move_to_with_progress() -> error::Result<()> {
   let mut called = 0;
   let dir_move = dir.move_to_with_progress(&dest, &fs_extra::dir::CopyOptions::new(), |_prg| {
     called += 1;
-    fs_extra::dir::TransitProcessResult::ContinueOrAbort    
+    fs_extra::dir::TransitProcessResult::ContinueOrAbort
   })?;
   assert!(called >= 1);
   assert_eq!(dir_move.path, dest);
