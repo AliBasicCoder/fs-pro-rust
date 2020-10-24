@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 /// working with directories 
 #[derive(Debug, Clone)]
 pub struct Dir {
+  /// the path of directory
   pub path: PathBuf,
 }
 
@@ -99,7 +100,7 @@ impl Dir {
     path_stuff::name(self.path.as_path())
   }
   /// parses the path and returns fs_pro::ParedPathDir
-  pub fn parse_path(&self) -> error::Result<path_stuff::ParsedPathDir> {
+  pub fn parse_path(&self) -> error::Result<path_stuff::ParsedPathDir<'_>> {
     path_stuff::parse_path_dir(self.path.as_path())
   }
   /// get the size of directory in bytes

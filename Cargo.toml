@@ -12,8 +12,11 @@ categories = ["filesystem"]
 keywords = ["fs", "filesystem", "files", "folders", "fspro"]
 documentation = "https://docs.rs/fs_pro"
 
+[features]
+json = ["serde", "serde_json"]
+
 [dependencies]
 fs_extra = "1.1.0"
 rand = "0.7.3"
-serde = "1.0"
-serde_json = "1.0"
+serde = { version = "1.0", optional = true }
+serde_json = { version = "1.0", optional = true }

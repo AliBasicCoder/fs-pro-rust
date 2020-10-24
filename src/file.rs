@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 /// the File struct is a struct to help you work with files
 #[derive(Debug, Clone)]
 pub struct File {
+  /// the path of file
   pub path: PathBuf,
 }
 
@@ -122,7 +123,7 @@ impl File {
     path_stuff::extension(self.path.as_path())
   }
   /// parses the file path and returns fs_pro::ParsedPathFile
-  pub fn parse_path(&self) -> error::Result<path_stuff::ParsedPathFile> {
+  pub fn parse_path(&self) -> error::Result<path_stuff::ParsedPathFile<'_>> {
     path_stuff::parse_path_file(self.path.as_path())
   }
   /// returns the size of file in bytes
@@ -304,6 +305,7 @@ impl File {
   /// 
   /// let json: Value = file.json();
   /// ```
+  #[cfg(feature = "json")]
   pub fn json<T: for<'de> serde::Deserialize<'de>>(&self) -> error::Result<T> {
     let file = error::result_from_io(fs::File::open(&self.path))?;
     let reader = std::io::BufReader::new(file);

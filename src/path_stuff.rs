@@ -16,7 +16,7 @@ pub fn get_rand_chars(len: usize) -> String {
 pub struct ParsedPathFile<'a> {
   /// the path of file
   pub path: &'a str,
-  // the parent of file
+  /// the parent of file
   pub parent: &'a str,
   /// the file name of file (including extension)
   pub name: &'a str,
@@ -38,6 +38,7 @@ pub struct ParsedPathDir<'a> {
 }
 
 #[macro_export]
+/// join paths together and returns PathBuf
 macro_rules! join {
   ($($thing: expr),*) => {
      {

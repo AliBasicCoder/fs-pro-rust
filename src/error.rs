@@ -32,6 +32,7 @@ pub enum ErrorKind {
   PathNoFilenameFound,
   /// on extension found in path
   PathNoExtensionFound,
+  #[cfg(feature = "json")]
   /// an error happen read file as json
   JsonError(serde_json::error::Error),
   /// any other error
@@ -40,6 +41,7 @@ pub enum ErrorKind {
 
 impl ErrorKind {
   fn as_str(&self) -> &str {
+    // let res: &str;
     match *self {
       ErrorKind::NotFound => "entity not found",
       ErrorKind::PermissionDenied => "permission denied",
@@ -54,24 +56,30 @@ impl ErrorKind {
       ErrorKind::PathNoParentFound => "cannot find any parent directory",
       ErrorKind::PathNoFilenameFound => "cannot find filename",
       ErrorKind::PathNoExtensionFound => "cannot find file extension",
+      #[cfg(feature = "json")]
       ErrorKind::JsonError(_) => "an error happen read file as json",
     }
   }
 }
 
 #[derive(Debug)]
+/// any kind of error
 pub struct Error {
+  /// the kind of the Error see fs_pro::error::Error
   pub kind: ErrorKind,
+  /// the message
   pub message: String,
 }
 
 impl Error {
+  /// create a new Error
   pub fn new(kind: ErrorKind, message: &str) -> Error {
     Error {
       kind: kind,
       message: message.to_string(),
     }
   }
+  /// create new error from ErrorKind and adds default msg
   pub fn new_from_kind(kind: ErrorKind) -> Error {
     let msg = (&kind).as_str().to_string();
     Error {
@@ -118,14 +126,15 @@ impl StdError for Error {
 }
 
 impl fmt::Display for Error {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "{}", self.message)
   }
 }
 
+/// fs_pro's version of Result
 pub type Result<T> = ::std::result::Result<T, Error>;
 
-// convert fs_extra::error::Result to fs_pro::error::Result
+/// convert fs_extra::error::Result to fs_pro::error::Result
 pub fn result_from_fse<T>(fse_res: fs_extra::error::Result<T>) -> Result<T> {
   match fse_res {
     Ok(val) => Ok(val),
@@ -133,6 +142,7 @@ pub fn result_from_fse<T>(fse_res: fs_extra::error::Result<T>) -> Result<T> {
   }
 }
 
+/// converts std::io::Result to fs_pro::error::Result
 pub fn result_from_io<T>(io_res: std::io::Result<T>) -> Result<T> {
   match io_res {
     Ok(val) => Ok(val),
@@ -140,6 +150,7 @@ pub fn result_from_io<T>(io_res: std::io::Result<T>) -> Result<T> {
   }
 }
 
+/// converts Option to fs_pro::error::Result
 #[allow(dead_code)]
 pub fn result_from_option<T>(maybe_val: Option<T>, err: Error) -> Result<T> {
   if let Some(val) = maybe_val {

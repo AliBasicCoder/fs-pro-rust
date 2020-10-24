@@ -261,6 +261,7 @@ fn move_with_progress() {
   okay_to_err(file_move.delete());
 }
 
+#[cfg(feature = "json")]
 #[test]
 fn json() -> error::Result<()> {
   let file = File::temp_file_rand()?;
