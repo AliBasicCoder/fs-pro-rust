@@ -298,4 +298,19 @@ impl File {
     ))?;
     Ok(File::new(to)?)
   }
+  /// parses file as json
+  /// ```
+  /// use serde_json::Value;
+  /// 
+  /// let json: Value = file.json();
+  /// ```
+  pub fn json<T: for<'de> serde::Deserialize<'de>>(&self) -> error::Result<T> {
+    let file = error::result_from_io(fs::File::open(&self.path))?;
+    let reader = std::io::BufReader::new(file);
+    let maybe_res: serde_json::error::Result<T> = serde_json::from_reader(reader);
+    match maybe_res {
+      Ok(res) => Ok(res),
+      Err(e) => Err(error::Error::new_from_kind(error::ErrorKind::JsonError(e)))
+    }
+  }
 }

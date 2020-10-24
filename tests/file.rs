@@ -260,3 +260,12 @@ fn move_with_progress() {
   okay_to_err(file.delete());
   okay_to_err(file_move.delete());
 }
+
+#[test]
+fn json() -> error::Result<()> {
+  let file = File::temp_file_rand()?;
+  file.write("{\"hello\":\"world\"}")?;
+  let json: serde_json::Value = file.json()?;
+  assert_eq!(json["hello"], String::from("world"));
+  Ok(())
+}

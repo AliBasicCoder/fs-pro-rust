@@ -15,3 +15,5 @@ documentation = "https://docs.rs/fs_pro"
 [dependencies]
 fs_extra = "1.1.0"
 rand = "0.7.3"
+serde = "1.0"
+serde_json = "1.0"

@@ -7,6 +7,11 @@ use file::File;
 use fs_extra;
 
 fn main() {
+    let file10 = File::new("hi.json").unwrap();
+    file10.write("{\"hi\":\"there\"}").unwrap();
+    let json: serde_json::Value = file10.json().unwrap();
+    println!("{:?}", json);
+    file10.delete().unwrap();
     println!("{:?}", File::temp_file_rand());
     let current_dir = std::env::current_dir().unwrap();
     println!("{:?}", current_dir);

@@ -6,7 +6,7 @@ use std::io::Error as IoError;
 use std::io::ErrorKind as IoErrorKind;
 
 /// A list specifying general categories of fs_pro error.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub enum ErrorKind {
   /// An entity was not found.
   NotFound,
@@ -32,6 +32,8 @@ pub enum ErrorKind {
   PathNoFilenameFound,
   /// on extension found in path
   PathNoExtensionFound,
+  /// an error happen read file as json
+  JsonError(serde_json::error::Error),
   /// any other error
   Other,
 }
@@ -52,6 +54,7 @@ impl ErrorKind {
       ErrorKind::PathNoParentFound => "cannot find any parent directory",
       ErrorKind::PathNoFilenameFound => "cannot find filename",
       ErrorKind::PathNoExtensionFound => "cannot find file extension",
+      ErrorKind::JsonError(_) => "an error happen read file as json",
     }
   }
 }
@@ -70,9 +73,10 @@ impl Error {
     }
   }
   pub fn new_from_kind(kind: ErrorKind) -> Error {
+    let msg = (&kind).as_str().to_string();
     Error {
       kind: kind,
-      message: kind.as_str().to_string(),
+      message: msg,
     }
   }
   /// convert std::io::Error to fs_pro::error::Error
