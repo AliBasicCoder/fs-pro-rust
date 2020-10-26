@@ -50,7 +50,12 @@ mod dir;
 pub mod error;
 mod file;
 mod path_stuff;
+/// this module contains every thing about Shape
+pub mod shape;
 
 pub use dir::Dir;
+pub use dir::DirEntry;
 pub use file::File;
+pub use fs_pro_macros::Shape;
 pub use path_stuff::{ParsedPathDir, ParsedPathFile};
+pub use shape::Shape;

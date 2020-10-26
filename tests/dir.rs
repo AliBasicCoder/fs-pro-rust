@@ -1,4 +1,4 @@
-use fs_pro::{error, Dir, File, ParsedPathDir};
+use fs_pro::{error, Dir, DirEntry, File, ParsedPathDir};
 
 fn okay_to_err<T, E>(result: Result<T, E>) {
   match result {
@@ -212,5 +212,26 @@ fn move_to_with_progress() -> error::Result<()> {
   assert_eq!(dir_move.exists(), true);
   assert_eq!(dir.exists(), false);
   okay_to_err(dir_move.delete());
+  Ok(())
+}
+
+#[test]
+fn read() -> error::Result<()> {
+  let dir = Dir::temp_dir_rand()?;
+  dir.create_dir("foo")?;
+  dir.create_file("bar")?;
+  let array = dir.read()?;
+  assert_eq!(array.len(), 2);
+  for entry in array {
+    match entry {
+      DirEntry::File(file) => {
+        assert_eq!(file.name()?, "bar");
+      }
+      DirEntry::Dir(dir) => {
+        assert_eq!(dir.name()?, "foo");
+      }
+    }
+  }
+  okay_to_err(dir.delete());
   Ok(())
 }

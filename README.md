@@ -17,7 +17,24 @@ see the full docs [here](https://docs.rs/fs_pro)
 ## Usage
 
 ```rust
-use fs_pro::{Dir, File, error::Result};
+use fs_pro::{Dir, File, Shape, error::Result};
+
+#[derive(Shape)]
+struct ChildShapedDir {
+  #[name = "child_file.txt"]
+  child_file: File
+  // ...
+}
+
+#[derive(Shape)]
+struct MyShapedDir {
+  #[name = "my_file.txt"]
+  my_file: File,
+  #[pattern = "*.txt"]
+  my_dir: Dir,
+  child_shaped_dir: ChildShapedDir
+}
+
 
 fn main() -> Result<()> {
   let file = File::new("my_file.txt");
@@ -35,9 +52,21 @@ fn main() -> Result<()> {
   dir.create_file("my_file.txt").unwrap().write("hello world");
   // create a dir in it
   dir.create_dir("my_dir");
+
+  let shape: Shape<MyShapedDir> = Shape::new();
+  let shape_inst = shape.create_at("target").unwrap();
+  println!("{:?}", shape_inst.my_file); // File
+  println!("{:?}", shape_inst.my_dir); // Dir
+  println!("{:?}", shape_inst.child_shaped_dir.child_file); // File
+
   // and much more...
+  Ok(())
 }
 ```
+
+## rust features
+
+- json: adds method json on File
 
 ## Licence
 

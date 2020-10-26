@@ -1,8 +1,10 @@
 use crate::error;
 use crate::file;
+use crate::file::File;
 use crate::path_stuff;
 use fs_extra;
 use std::collections::{HashMap, HashSet};
+use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -12,6 +14,56 @@ use std::path::{Path, PathBuf};
 pub struct Dir {
   /// the path of directory
   pub path: PathBuf,
+}
+
+/// the result of Dir.read()
+/// this struct express a item in a folder
+#[derive(Debug)]
+#[allow(missing_docs)]
+pub enum DirEntry {
+  File(File),
+  Dir(Dir),
+}
+
+impl DirEntry {
+  /// get the path of entry
+  pub fn path(&self) -> PathBuf {
+    match self {
+      DirEntry::File(entry) => entry.path.clone(),
+      DirEntry::Dir(entry) => entry.path.clone(),
+    }
+  }
+  /// get the raw name of entry
+  pub fn file_name(&self) -> OsString {
+    match self {
+      DirEntry::File(entry) => entry.path.file_name().unwrap().to_os_string(),
+      DirEntry::Dir(entry) => entry.path.file_name().unwrap().to_os_string(),
+    }
+  }
+  /// return true if entry is a file
+  #[allow(dead_code)]
+  pub fn is_file(&self) -> bool {
+    if let DirEntry::File(_) = self {
+      true
+    } else {
+      false
+    }
+  }
+  /// returns true if entry is a folder
+  #[allow(dead_code)]
+  pub fn is_dir(&self) -> bool {
+    if let DirEntry::Dir(_) = self {
+      true
+    } else {
+      false
+    }
+  }
+}
+
+impl AsRef<Path> for Dir {
+  fn as_ref(&self) -> &Path {
+    self.path.as_path()
+  }
 }
 
 // new and prop-like methods
@@ -406,5 +458,53 @@ impl Dir {
     config: &HashSet<fs_extra::dir::DirEntryAttr>,
   ) -> error::Result<fs_extra::dir::LsResult> {
     error::result_from_fse(fs_extra::dir::ls(&self.path, config))
+  }
+  /// reads the folder
+  /// ```
+  /// use fs_pro::DirEntry;
+  /// for entry in my_dir.read()? {
+  ///   match entry {
+  ///     DirEntry::File(file) => {
+  ///       println!("{:?} is a file", file.path)
+  ///     }
+  ///     DirEntry::Dir(dir) => {
+  ///       println!("{:?} is a folder", dir.path)
+  ///     }
+  ///   }
+  /// }
+  /// ```
+  pub fn read(&self) -> error::Result<Vec<DirEntry>> {
+    let mut result: Vec<DirEntry> = vec![];
+    for entry in error::result_from_io(fs::read_dir(self.path.as_path()))? {
+      let entry = error::result_from_io(entry)?;
+      if entry.path().is_file() {
+        result.push(DirEntry::File(File::new(entry.path())?));
+      } else {
+        result.push(DirEntry::Dir(Dir::new(entry.path())?));
+      }
+    }
+    Ok(result)
+  }
+  /// read the dir and return an array containing the file name of each entry as OsString
+  pub fn read_as_osstring_vec(&self) -> error::Result<Vec<OsString>> {
+    let mut result: Vec<OsString> = vec![];
+    for entry in error::result_from_io(fs::read_dir(self.path.as_path()))? {
+      let entry = error::result_from_io(entry)?;
+      result.push(entry.file_name());
+    }
+    Ok(result)
+  }
+  /// read the dir and return an array containing the full path of each entry as PathBuf
+  pub fn read_as_pathbuf_vec(&self) -> error::Result<Vec<PathBuf>> {
+    let mut result: Vec<PathBuf> = vec![];
+    for entry in error::result_from_io(fs::read_dir(self.path.as_path()))? {
+      let entry = error::result_from_io(entry)?;
+      result.push(entry.path());
+    }
+    Ok(result)
+  }
+  /// checks if an entry (file or folder) exists in the dir
+  pub fn entry_exists<P: AsRef<Path>>(&self, path: P) -> bool {
+    self.path.join(path).exists()
   }
 }

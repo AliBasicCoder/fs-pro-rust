@@ -4,6 +4,7 @@ use std::error::Error as StdError;
 use std::fmt;
 use std::io::Error as IoError;
 use std::io::ErrorKind as IoErrorKind;
+use std::path::PathBuf;
 
 /// A list specifying general categories of fs_pro error.
 #[derive(Debug)]
@@ -18,9 +19,9 @@ pub enum ErrorKind {
   Interrupted,
   /// Invalid folder found.
   InvalidFolder,
-  /// file is invalid
+  /// Invalid file found
   InvalidFile,
-  /// folder is invalid
+  /// file name is invalid
   InvalidFileName,
   /// Invalid path.
   InvalidPath,
@@ -48,16 +49,16 @@ impl ErrorKind {
       ErrorKind::AlreadyExists => "entity already exists",
       ErrorKind::Interrupted => "operation interrupted",
       ErrorKind::Other => "other os error",
-      ErrorKind::InvalidFolder => "the file is invalid",
-      ErrorKind::InvalidFile => "the folder is invalid",
-      ErrorKind::InvalidFileName => "invalid file name error",
+      ErrorKind::InvalidFolder => "the folder is invalid",
+      ErrorKind::InvalidFile => "the file is invalid",
+      ErrorKind::InvalidFileName => "invalid file name",
       ErrorKind::InvalidPath => "invalid path",
       ErrorKind::PathToStrConversionFail => "path cannot be converted to utf-8 string (&str)",
       ErrorKind::PathNoParentFound => "cannot find any parent directory",
       ErrorKind::PathNoFilenameFound => "cannot find filename",
       ErrorKind::PathNoExtensionFound => "cannot find file extension",
       #[cfg(feature = "json")]
-      ErrorKind::JsonError(_) => "an error happen read file as json",
+      ErrorKind::JsonError(_) => "an error happen reading file as json",
     }
   }
 }
@@ -69,23 +70,40 @@ pub struct Error {
   pub kind: ErrorKind,
   /// the message
   pub message: String,
+  /// an optional path representing the file or folder that caused the error
+  pub path: Option<PathBuf>,
 }
 
 impl Error {
   /// create a new Error
   pub fn new(kind: ErrorKind, message: &str) -> Error {
     Error {
-      kind: kind,
+      kind,
       message: message.to_string(),
+      path: None,
+    }
+  }
+  /// create a new Error
+  pub fn new2(kind: ErrorKind, message: String) -> Error {
+    Error {
+      kind,
+      message,
+      path: None,
     }
   }
   /// create new error from ErrorKind and adds default msg
   pub fn new_from_kind(kind: ErrorKind) -> Error {
     let msg = (&kind).as_str().to_string();
     Error {
-      kind: kind,
+      kind,
       message: msg,
+      path: None,
     }
+  }
+  ///
+  pub fn set_path(mut self, path: PathBuf) -> Self {
+    self.path = Some(path);
+    self
   }
   /// convert std::io::Error to fs_pro::error::Error
   pub fn from_io(io_err: IoError) -> Error {

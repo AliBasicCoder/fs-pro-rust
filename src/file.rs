@@ -14,6 +14,12 @@ pub struct File {
   pub path: PathBuf,
 }
 
+impl AsRef<Path> for File {
+  fn as_ref(&self) -> &Path {
+    self.path.as_path()
+  }
+}
+
 // new and static methods and prop-like methods
 #[allow(dead_code)]
 impl File {
